@@ -1,0 +1,4 @@
+python-dotenv
+requests
+web3-ethereum-defi[data]
+flask
