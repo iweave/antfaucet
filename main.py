@@ -3,8 +3,6 @@ from flask import Flask,render_template,request
 from dotenv import load_dotenv
 import time, datetime
 import os
-import sys
-from decimal import Decimal
 
 from eth_account import Account
 from eth_account.signers.local import LocalAccount
