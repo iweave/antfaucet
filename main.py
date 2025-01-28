@@ -82,7 +82,7 @@ def prepare_faucet_database(faucetdb):
             faucetdb.commit()
             return True
         except sqlite3.Error as e:
-            print(f"An error occurred: {e.args[0]}")
+            app.logger.info("And error occured with the db: " + str(e.args[0]))
             return False
  
 
