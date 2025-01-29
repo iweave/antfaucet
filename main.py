@@ -153,6 +153,22 @@ def check_db_for_wallet(wallet):
         return True
 
 # Check for velocity of drips
+def check_db_for_drips():
+    #return False
+    # Get a cursor
+    cur = faucetdb.cursor()
+    
+    # Count successful drips
+    cur.execute("SELECT count(timestamp) AS drips FROM faucet;")
+    drips_result = cur.fetchall()
+    if drips_result:
+        #return { "status": False, "reason": drips_result }
+        if int(drips_result[0][0]):
+            # Return the number of records minus the inital test
+            return { "status": True, "reason": drips_result[0][0]-1 }
+    return { "status": False, "reason": "no results" }
+
+# Check for velocity of drips
 def check_db_for_rate():
     #return False
     # Get a cursor
@@ -263,7 +279,17 @@ def home():
 @app.route('/form')
 def form():
     return render_template('form.html',sitekey=HCAPTCHA_SITEKEY)
- 
+
+@app.route('/drips')
+def drips():
+        # Verify the request looks ok
+        my_data = check_db_for_drips()
+
+        if my_data["status"]!=True:
+            return render_template('fail.html', results = my_data["reason"])
+        else:
+            return render_template('drips.html', results = my_data["reason"])
+        
 @app.route('/data/', methods = ['POST', 'GET'])
 def data():
     if request.method == 'GET':
