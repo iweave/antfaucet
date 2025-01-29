@@ -140,7 +140,7 @@ def drip_coins(wallet):
         return { "status": False, "reason": "token is: "+web3.eth.chain_id}
 
 # See if wallet has already received payments
-def check_db(wallet):
+def check_db_for_wallet(wallet):
     #return False
     # Get a cursor
     cur = faucetdb.cursor()
