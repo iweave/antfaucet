@@ -29,6 +29,10 @@ DEBUG_DRIP = 0.00000001
 ETH_DRIP = .001
 ANT_DRIP = .25
 
+# Rate informaion in seconds
+RATE_WINDOW = 60 * 60
+RATE_LIMIT = 6
+
 # Read and setup a local private key
 private_key = os.environ.get("PRIVATE_KEY")
 assert private_key is not None, "You must set PRIVATE_KEY environment variable"
@@ -142,11 +146,26 @@ def check_db(wallet):
     cur = faucetdb.cursor()
     
     # See if we get a cached record
-    cur.execute("SELECT * FROM faucet WHERE wallet = '" + wallet + 
+    cur.execute("SELECT timestamp FROM faucet WHERE wallet = '" + wallet + 
                 "' LIMIT 1")
     cached_result = cur.fetchall()
     if cached_result:
         return True
+
+# Check for velocity of drips
+def check_db_for_rate():
+    #return False
+    # Get a cursor
+    cur = faucetdb.cursor()
+    
+    # See if we get a cached record
+    #cur.execute("SELECT count(timestamp) FROM faucet WHERE timestamp > ( unixepoch() - " + str(RATE_WINDOW) + ")")
+    cur.execute("SELECT count(timestamp) AS drips FROM faucet WHERE timestamp > ( unixepoch() - " + str(RATE_WINDOW) + " )")
+    cached_result = cur.fetchall()
+    if cached_result:
+        if int(cached_result[0][0]) >= int(RATE_LIMIT):
+            return cached_result[0][0]
+    return False
 
 # Save wallet in db
 def add_db(wallet):
@@ -205,9 +224,15 @@ def validate_request(form_data):
         wallet = re.sub(r"[^A-Fa-fXx0-9]+", '', form_data["wallet"])
 
         # See if this wallet has already suceeded
-        if check_db(wallet):
+        if check_db_for_wallet(wallet):
             return { "status": "fail", "reason": "already received payout" }
         
+        # Check for rate limit
+        rate_limit = check_db_for_rate()
+        if rate_limit:
+            #return { "status": "fail", "reason": rate_limit }
+            return { "status": "fail", "reason": "rate limit exceeded" }
+
         # OK let's drip
         results = drip_coins(wallet)
         app.logger.info("Returned from drip" + str(results))
