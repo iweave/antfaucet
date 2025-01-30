@@ -56,7 +56,7 @@ web3 = Web3(HTTPProvider(v2_url))
 faucetdb = sqlite3.connect('faucet.db', check_same_thread=False)
 
 # Make sure Faucet Database is ready to store data
-def prepare_faucet_database(faucetdb):
+def prepare_faucet_database():
 
     # Get a cursor
     cur = faucetdb.cursor()
@@ -308,7 +308,7 @@ def data():
  
 if __name__ == '__main__':
     # Initialize database
-    if prepare_faucet_database(faucetdb):
+    if prepare_faucet_database():
         app.run(debug=True, host='0.0.0.0', port=5000)
     else:
         print("Program terminated due to issues with price database")
