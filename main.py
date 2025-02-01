@@ -29,6 +29,10 @@ DEBUG_DRIP = 0.00000001
 ETH_DRIP = DEBUG_DRIP
 ANT_DRIP = DEBUG_DRIP
 
+# What date to start checking for faucet drips
+# Allows to report total ant/eth awarded without penalizing early tests
+TIME_HORIZON = 1738085919
+
 # Rate informaion in seconds
 RATE_WINDOW = 60 * 60
 RATE_LIMIT = 6
@@ -147,7 +151,7 @@ def check_db_for_wallet(wallet):
     
     # See if we get a cached record
     cur.execute("SELECT timestamp FROM faucet WHERE wallet = '" + wallet + 
-                "' LIMIT 1")
+                "' AND timestamp > " + TIME_HORIZON + " LIMIT 1")
     cached_result = cur.fetchall()
     if cached_result:
         return True
