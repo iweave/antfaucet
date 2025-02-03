@@ -272,6 +272,9 @@ def validate_request(form_data):
 
 app = Flask(__name__)
 
+# Set a content length to protect from overflows
+app.config['MAX_CONTENT_LENGTH'] = 1 * 1000 * 1000
+
 @app.route('/')
 def home():
     return render_template('form.html',sitekey=HCAPTCHA_SITEKEY)
