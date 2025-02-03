@@ -150,8 +150,7 @@ def check_db_for_wallet(wallet):
     cur = faucetdb.cursor()
     
     # See if we get a cached record
-    cur.execute("SELECT timestamp FROM faucet WHERE wallet = '" + wallet + 
-                "' AND timestamp > " + TIME_HORIZON + " LIMIT 1")
+    cur.execute("SELECT timestamp FROM faucet WHERE wallet = ? AND timestamp > ? LIMIT 1", [ wallet, str(TIME_HORIZON) ])
     cached_result = cur.fetchall()
     if cached_result:
         return True
@@ -180,7 +179,7 @@ def check_db_for_rate():
     
     # See if we get a cached record
     #cur.execute("SELECT count(timestamp) FROM faucet WHERE timestamp > ( unixepoch() - " + str(RATE_WINDOW) + ")")
-    cur.execute("SELECT count(timestamp) AS drips FROM faucet WHERE timestamp > ( unixepoch() - " + str(RATE_WINDOW) + " )")
+    cur.execute("SELECT count(timestamp) AS drips FROM faucet WHERE timestamp > ( unixepoch() - ? )", [str(RATE_WINDOW)])
     cached_result = cur.fetchall()
     if cached_result:
         if int(cached_result[0][0]) >= int(RATE_LIMIT):
@@ -194,11 +193,8 @@ def add_db(wallet):
 
     at = int(time.time())
     app.logger.info("Inserting: "+str(at)+" "+wallet)
-    cur.execute("INSERT INTO faucet VALUES ( " +
-                str(at) + ", '" + 
-                wallet + "', " + 
-                str(ETH_DRIP) + ", " +
-                str(ANT_DRIP) + ");")
+    cur.execute("INSERT INTO faucet VALUES ( ?, ?, ?, ?);",
+                [ str(at), wallet, str(ETH_DRIP), str(ANT_DRIP) ])
     faucetdb.commit()
 
 # Validate a h-captcha-response
