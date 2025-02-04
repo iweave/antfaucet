@@ -21,10 +21,8 @@ logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
 
-ANT_TOKEN_ID=421614
+TOKEN_CHAIN_ID=421614
 ERC_20_TOKEN_ADDRESS = "0xBE1802c27C324a28aeBcd7eeC7D734246C807194"
-YOUR_WALLET = "0xe27a2be784f18caf6791B7EB7C2dAa6E8cc372A1"
-MY_WALLET = "0x9C1b147e73A46DDd1a59E3E00A2A88DFFA67e63e"
 DEBUG_DRIP = 0.00000001
 ETH_DRIP = .001
 ANT_DRIP = .25
@@ -51,7 +49,6 @@ assert HCAPTCHA_SITEKEY is not None, "You must set HCAPTCHA_SITEKEY environment 
 ALCHEMY_KEY = os.environ.get('API_KEY')
 assert ALCHEMY_KEY is not None, "You must set API_KEY environment variable"
 
-v2_ws = "wss://arb-sepolia.g.alchemy.com/v2/" + ALCHEMY_KEY
 v2_url = "https://arb-sepolia.g.alchemy.com/v2/" + ALCHEMY_KEY
 web3 = Web3(HTTPProvider(v2_url))
 #print(f"Connected to blockchain, chain id is {web3.eth.chain_id}. the latest block is {web3.eth.block_number:,}")
@@ -105,8 +102,8 @@ def drip_coins(wallet):
 
     if not web3.is_checksum_address(wallet):
         return { "status": False, "reason": "value provided is not a valid wallet" }
-    # We successfully connected to the ANT chain
-    if ANT_TOKEN_ID == web3.eth.chain_id:
+    # We successfully connected to the Token chain
+    if TOKEN_CHAIN_ID == web3.eth.chain_id:
         # Get users current status of token and their address
         erc_20 = get_deployed_contract(web3, "ERC20MockDecimals.json", ERC_20_TOKEN_ADDRESS)
         token_details = fetch_erc20_details(web3, ERC_20_TOKEN_ADDRESS)
@@ -155,7 +152,7 @@ def check_db_for_wallet(wallet):
     if cached_result:
         return True
 
-# Check for velocity of drips
+# Check for volume of drips
 def check_db_for_drips():
     #return False
     # Get a cursor
@@ -194,7 +191,7 @@ def add_db(wallet):
     at = int(time.time())
     app.logger.info("Inserting: "+str(at)+" "+wallet)
     cur.execute("INSERT INTO faucet VALUES ( ?, ?, ?, ?);",
-                [ str(at), wallet, str(ETH_DRIP), str(ANT_DRIP) ])
+                [ at, wallet, ETH_DRIP, ANT_DRIP ])
     faucetdb.commit()
 
 # Validate a h-captcha-response
