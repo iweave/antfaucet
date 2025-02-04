@@ -6,6 +6,8 @@ This is a sample Flask app to create a cryptocurrency faucet for a ERC-20 Token 
 
 This faucet transfers ETH to enable the wallet to have gas to use with the ERC-20 tokens
 
+There is a [blog post](https://blog.skillcadet.com/2025/02/02/Writing-a-faucet-dapp.html) that goes through the creation of this script.
+
 ### Environment variables
 
 The example is designed to use with [Alchemy](https://alchemy.com) as an endpoint. Any other valid RPC endpoint should work.
