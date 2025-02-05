@@ -21,7 +21,7 @@
     <script type="text/javascript">
       window.userWalletAddress = null
       const connectWallet = document.getElementById('connectWallet')
-      const walletInput = document.getElementById('wallet')
+      var walletInput = document.getElementById('wallet')
 
 
       function checkInstalled() {
@@ -35,6 +35,7 @@
       }
 
       async function connectWalletwithMetaMask() {
+        walletInput = document.getElementById('wallet')
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
         .catch((e) => {
         console.error(e.message)
@@ -43,8 +44,30 @@
 
         if (!accounts) { return }
 
+        // If we only have one account, update the wallet field
+        if (accounts.length == 1) {
         window.userWalletAddress = accounts[0]
         walletInput.value = window.userWalletAddress
+        // If we have more than one account, create a select list
+        } else {
+
+          // Create a select element
+          const selectField = document.createElement('select');
+          selectField.id = 'wallet';
+          selectField.name = walletInput.name;
+
+
+          // Add options to the select field
+          accounts.forEach(account => {
+            const optionElement = document.createElement('option');
+            optionElement.value = account;
+            optionElement.text = account;
+            selectField.appendChild(optionElement);
+          });
+
+          // Replace the input field with the select field
+          walletInput.parentNode.replaceChild(selectField, walletInput);
+        }
 
         connectWallet.innerText = 'Sign Out'
         connectWallet.removeEventListener('click', connectWalletwithMetaMask)
@@ -58,7 +81,22 @@
       function signOutOfMetaMask() {
         window.userWalletAddress = null
         connectWallet.innerText = 'Connect Wallet'
-        walletInput.value = null
+        walletInput = document.getElementById('wallet')
+
+        // Did we change the Input field to a Select field?
+        if ( walletInput instanceof HTMLSelectElement ) {
+          // Create a input element
+          const inputField = document.createElement('input');
+          inputField.id = 'wallet';
+          inputField.name = walletInput.name;
+          inputField.type = "text";
+          inputField.value = null;
+
+          // Replace the select field with the input field
+          walletInput.parentNode.replaceChild(inputField, walletInput);
+        } else {
+          walletInput.value = null
+        }
 
         connectWallet.removeEventListener('click', signOutOfMetaMask)
         setTimeout(() => {
