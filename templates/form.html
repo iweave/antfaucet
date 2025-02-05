@@ -1,14 +1,76 @@
-<head>
-    <title>ANT/ETH Faucet for Automoni Testing</title>
-    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+<html>
+  </html><head>
+      <title>ANT/ETH Faucet for Automoni Testing</title>
+      <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
   </head>
-<form action="/data/" method = "POST">
-    <p>ANT/ETH Faucet</p>
-    <p> Arbitrum Sepolia Wallet <input type = "text" name = "wallet" /></p>
-    <div class="h-captcha" data-sitekey="{{sitekey}}"></div>
-    <p><input type = "submit" value = "Submit" /></p>
-</form>
+  <body>
+    <form action="/data/" method = "POST">
+        <p>ANT/ETH Faucet</p>
+        <p> Arbitrum Sepolia Wallet <input id="wallet" type = "text" name = "wallet" /></p>
+        <div class="h-captcha" data-sitekey="{{sitekey}}"></div>
+        <p><input type = "submit" value = "Submit" /></p>
+    </form>
+    
+    <button id='connectWallet' onclick="">Connect Wallet</button>
 
-<p>Autonomi <a href="https://www.autonomi.com">Website</a></p>
-<p>Autonomi <a href="https://discord.gg/autonomi">Discord</a></p>
-<p>Feedback/Pull Requests <a href="https://github.com/iweave/antfaucet">@github</a></p>
+
+    <p>Autonomi <a href="https://www.autonomi.com">Website</a></p>
+    <p>Autonomi <a href="https://discord.gg/autonomi">Discord</a></p>
+    <p>Feedback/Pull Requests <a href="https://github.com/iweave/antfaucet">@github</a></p>
+
+    <script type="text/javascript">
+      window.userWalletAddress = null
+      const connectWallet = document.getElementById('connectWallet')
+      const walletInput = document.getElementById('wallet')
+
+
+      function checkInstalled() {
+        if (typeof window.ethereum == 'undefined') {
+          connectWallet.innerText = 'MetaMask isnt installed, please install it'
+          connectWallet.classList.remove()
+          connectWallet.classList.add()
+          return false
+        }
+        connectWallet.addEventListener('click', connectWalletwithMetaMask)
+      }
+
+      async function connectWalletwithMetaMask() {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+        .catch((e) => {
+        console.error(e.message)
+        return
+        })
+
+        if (!accounts) { return }
+
+        window.userWalletAddress = accounts[0]
+        walletInput.value = window.userWalletAddress
+
+        connectWallet.innerText = 'Sign Out'
+        connectWallet.removeEventListener('click', connectWalletwithMetaMask)
+        setTimeout(() => {
+          connectWallet.addEventListener('click', signOutOfMetaMask)
+        }, 200)
+
+      }
+
+
+      function signOutOfMetaMask() {
+        window.userWalletAddress = null
+        connectWallet.innerText = 'Connect Wallet'
+        walletInput.value = null
+
+        connectWallet.removeEventListener('click', signOutOfMetaMask)
+        setTimeout(() => {
+          connectWallet.addEventListener('click', connectWalletwithMetaMask)
+        }, 200  )
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        checkInstalled()
+      })
+
+
+    </script>
+  </body>
+</html>
