@@ -93,7 +93,7 @@ def prepare_faucet_database():
 
 # Drip coins to wallet
 def drip_coins(wallet):
-    #return {'status': True, 'eth_tx': '0x622e2f0d1604d46e5cb553dd799f4034527f68bbd3fc3d561cc44039240d0d34', 'ant_tx': '0x6ee8553310fc684ee648ffcd569c96485e6c5a5b1276cbf3b83677eb7f5e1dfb'}
+    return {'status': True, 'eth_tx': '0x622e2f0d1604d46e5cb553dd799f4034527f68bbd3fc3d561cc44039240d0d34', 'ant_tx': '0x6ee8553310fc684ee648ffcd569c96485e6c5a5b1276cbf3b83677eb7f5e1dfb'}
 
     web3 = Web3(HTTPProvider(v2_url))
 
@@ -142,7 +142,7 @@ def drip_coins(wallet):
 
 # See if wallet has already received payments
 def check_db_for_wallet(wallet):
-    #return False
+    return False
     # Get a cursor
     cur = faucetdb.cursor()
     
@@ -309,6 +309,6 @@ def data():
 if __name__ == '__main__':
     # Initialize database
     if prepare_faucet_database():
-        app.run(debug=True, host='0.0.0.0', port=5000)
+        app.run(debug=True, host='0.0.0.0', port=5010)
     else:
-        print("Program terminated due to issues with price database")
+        print("Program terminated due to issues with faucet database")
