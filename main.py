@@ -1,5 +1,5 @@
 import logging
-from flask import Flask,render_template,request
+from flask import Flask,render_template,request,send_from_directory
 from dotenv import load_dotenv
 import time, datetime
 import os
@@ -305,7 +305,12 @@ def data():
             return render_template('fail.html', results=my_data["reason"])
 
         return render_template('success.html', my_data = my_data)
- 
+
+# Load Browser Favorite Icon if accessed directly
+@app.route('/favicon.ico')
+def favicon():
+    return app.send_static_file('favicon.ico')
+    
 if __name__ == '__main__':
     # Initialize database
     if prepare_faucet_database():
