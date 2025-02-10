@@ -254,7 +254,7 @@ def validate_request(form_data):
            isinstance(results, dict) and \
            "status" in results:
             # If we got a failure, just return the results
-            if results["status"] == "fail":
+            if results["status"] != True:
                 return results
             
             # Let's store our success
