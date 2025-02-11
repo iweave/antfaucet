@@ -79,10 +79,12 @@ def prepare_faucet_database():
                         wallet TEXT,
                         eth REAL,
                         ant REAL,
+                        eth_tx TEXT,
+                        ant_tx TEXT,
                         PRIMARY KEY (timestamp, wallet));""")
             # Insert a record
             cur.execute('''INSERT INTO faucet VALUES( 
-                        0,'0xdead',0,0)''') 
+                        0,'0xdead',0,0,'0xinit','0xinit')''') 
             # Save the changes
             faucetdb.commit()
             return True
@@ -93,7 +95,7 @@ def prepare_faucet_database():
 
 # Drip coins to wallet
 def drip_coins(wallet):
-    #return {'status': True, 'eth_tx': '0x622e2f0d1604d46e5cb553dd799f4034527f68bbd3fc3d561cc44039240d0d34', 'ant_tx': '0x6ee8553310fc684ee648ffcd569c96485e6c5a5b1276cbf3b83677eb7f5e1dfb'}
+    #return {'status': True, 'eth_tx': '0xtest_harness', 'ant_tx': '0xtest_harness'}
 
     web3 = Web3(HTTPProvider(v2_url))
 
@@ -184,14 +186,17 @@ def check_db_for_rate():
     return False
 
 # Save wallet in db
-def add_db(wallet):
+def add_db(wallet,ant_tx,eth_tx):
     # Get a cursor
     cur = faucetdb.cursor()
 
     at = int(time.time())
+    ant_drip = ANT_DRIP if ant_tx != '0xtest_harness' else 0.0
+    eth_drip = ETH_DRIP if eth_tx != '0xtest_harness' else 0.0
+
     app.logger.info("Inserting: "+str(at)+" "+wallet)
-    cur.execute("INSERT INTO faucet VALUES ( ?, ?, ?, ?);",
-                [ at, wallet, ETH_DRIP, ANT_DRIP ])
+    cur.execute("INSERT INTO faucet VALUES ( ?, ?, ?, ?, ?, ? );",
+                [ at, wallet, eth_drip, ant_drip, eth_tx, ant_tx ])
     faucetdb.commit()
 
 # Validate a h-captcha-response
@@ -258,7 +263,7 @@ def validate_request(form_data):
                 return results
             
             # Let's store our success
-            add_db(wallet)
+            add_db(wallet,results['ant_tx'],results['eth_tx'])
             results["Wallet"]=wallet
             #return { "status": "fail", "reason": "Always fail" }
             return results
