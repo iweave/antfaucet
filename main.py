@@ -21,8 +21,8 @@ logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
 
-TOKEN_CHAIN_ID=421614
-ERC_20_TOKEN_ADDRESS = "0xBE1802c27C324a28aeBcd7eeC7D734246C807194"
+TOKEN_CHAIN_ID=42161
+ERC_20_TOKEN_ADDRESS = "0xa78d8321B20c4Ef90eCd72f2588AA985A4BDb684"
 DEBUG_DRIP = 0.00000001
 ETH_DRIP = .001
 ANT_DRIP = .25
@@ -49,7 +49,7 @@ assert HCAPTCHA_SITEKEY is not None, "You must set HCAPTCHA_SITEKEY environment 
 ALCHEMY_KEY = os.environ.get('API_KEY')
 assert ALCHEMY_KEY is not None, "You must set API_KEY environment variable"
 
-v2_url = "https://arb-sepolia.g.alchemy.com/v2/" + ALCHEMY_KEY
+v2_url = "https://arb-mainnet.g.alchemy.com/v2/" + ALCHEMY_KEY
 web3 = Web3(HTTPProvider(v2_url))
 #print(f"Connected to blockchain, chain id is {web3.eth.chain_id}. the latest block is {web3.eth.block_number:,}")
 
@@ -144,7 +144,7 @@ def drip_coins(wallet):
 
 # See if wallet has already received payments
 def check_db_for_wallet(wallet):
-    #return False
+    return False
     # Get a cursor
     cur = faucetdb.cursor()
     
