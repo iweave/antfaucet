@@ -29,7 +29,7 @@ ANT_DRIP = DEBUG_DRIP
 
 # What date to start checking for faucet drips
 # Allows to report total ant/eth awarded without penalizing early tests
-TIME_HORIZON = 1739603374
+TIME_HORIZON = 1739603914
 
 # Rate informaion in seconds
 RATE_WINDOW = 60 * 60
@@ -144,7 +144,7 @@ def drip_coins(wallet):
 
 # See if wallet has already received payments
 def check_db_for_wallet(wallet):
-    return False
+    #return False
     # Get a cursor
     cur = faucetdb.cursor()
     
