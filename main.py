@@ -24,12 +24,12 @@ load_dotenv()
 TOKEN_CHAIN_ID=42161
 ERC_20_TOKEN_ADDRESS = "0xa78d8321B20c4Ef90eCd72f2588AA985A4BDb684"
 DEBUG_DRIP = 0.00000001
-ETH_DRIP = DEBUG_DRIP
-ANT_DRIP = DEBUG_DRIP
+ETH_DRIP = 0.00005
+ANT_DRIP = 0.0000002
 
 # What date to start checking for faucet drips
 # Allows to report total ant/eth awarded without penalizing early tests
-TIME_HORIZON = 1739603914
+TIME_HORIZON = 1740081343
 
 # Rate informaion in seconds
 RATE_WINDOW = 60 * 60
