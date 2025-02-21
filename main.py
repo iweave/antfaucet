@@ -156,7 +156,7 @@ def drip_coins(wallet):
             return { "status": False, "reason": message }
 
         # Wait for the transactions to complete
-        complete = wait_transactions_to_complete(web3, [ant_tx_hash, eth_tx_hash], max_timeout=datetime.timedelta(minutes=5))
+        complete = wait_transactions_to_complete(web3, [eth_tx_hash], max_timeout=datetime.timedelta(minutes=5))
 
         # Check our results
         for receipt in complete.values():
