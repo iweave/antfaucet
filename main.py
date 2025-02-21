@@ -120,23 +120,37 @@ def drip_coins(wallet):
             return { "status": False, "reason": "Out of ANT"}
         #return { "status": True, "ant": ant_balance, "eth": eth_balance }
         # Convert a human-readable number to fixed decimal with 18 decimal places
-        eth_amount = token_details.convert_to_raw(ETH_DRIP)
-        eth_tx_hash = web3.eth.send_transaction({
-                        "to": wallet,
-                        "from": account.address,
-                        "value": eth_amount,
-                    })
         
         ant_amount = token_details.convert_to_raw(ANT_DRIP)
         ant_tx_hash = erc_20.functions.transfer(wallet, ant_amount).transact({"from": account.address})
-        
+
         # Wait for the transactions to complete
-        complete = wait_transactions_to_complete(web3, [eth_tx_hash, ant_tx_hash], max_timeout=datetime.timedelta(minutes=5))
+        complete = wait_transactions_to_complete(web3, [ant_tx_hash], max_timeout=datetime.timedelta(minutes=5))
 
         # Check our results
         for receipt in complete.values():
             if receipt.status != 1:
-                return { "status": False, "reason": "transactions did not confirm" }
+                return { "status": False, "reason": "ANT trasnaction did not confirm" }
+            
+        #accountNonce = '0x' + str(web3.eth.get_transaction_count(account.address) + 1)
+
+        #return { "status": False, "reason": accountNonce }
+
+        eth_amount = token_details.convert_to_raw(ETH_DRIP)
+        eth_tx_hash = web3.eth.send_transaction({
+        #                "nonce": accountNonce,
+                        "to": wallet,
+                        "from": account.address,
+                        "value": eth_amount,
+                    })
+
+        # Wait for the transactions to complete
+        complete = wait_transactions_to_complete(web3, [eth_tx_hash], max_timeout=datetime.timedelta(minutes=5))
+
+        # Check our results
+        for receipt in complete.values():
+            if receipt.status != 1:
+                return { "status": False, "reason": "ETH transaction did not confirm" }
          
         return { "status": True, "eth_tx": eth_tx_hash.hex(), "ant_tx": ant_tx_hash.hex() }
     else:
