@@ -53,6 +53,9 @@ v2_url = "https://arb-sepolia.g.alchemy.com/v2/" + ALCHEMY_KEY
 web3 = Web3(HTTPProvider(v2_url))
 #print(f"Connected to blockchain, chain id is {web3.eth.chain_id}. the latest block is {web3.eth.block_number:,}")
 
+account: LocalAccount = Account.from_key(private_key)
+web3.middleware_onion.add(construct_sign_and_send_raw_middleware(account))
+
 # Connect to or create a SQLite3 database
 faucetdb = sqlite3.connect('faucet.db', check_same_thread=False)
 
@@ -94,12 +97,7 @@ def prepare_faucet_database():
 # Drip coins to wallet
 def drip_coins(wallet):
     #return {'status': True, 'eth_tx': '0x622e2f0d1604d46e5cb553dd799f4034527f68bbd3fc3d561cc44039240d0d34', 'ant_tx': '0x6ee8553310fc684ee648ffcd569c96485e6c5a5b1276cbf3b83677eb7f5e1dfb'}
-
-    web3 = Web3(HTTPProvider(v2_url))
-
-    account: LocalAccount = Account.from_key(private_key)
-    web3.middleware_onion.add(construct_sign_and_send_raw_middleware(account))
-
+    
     if not web3.is_checksum_address(wallet):
         return { "status": False, "reason": "value provided is not a valid wallet" }
     # We successfully connected to the Token chain
