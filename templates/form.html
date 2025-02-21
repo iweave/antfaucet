@@ -57,14 +57,14 @@
 
         // If we only have one account, update the wallet field
         if (accounts.length == 1) {
-          window.userWalletAddress = accounts[0]
-          walletInput.value = window.userWalletAddress
           // Create a input element
           const inputField = document.createElement('input');
           inputField.id = 'mm_wallet';
           inputField.name = 'mm_wallet';
           inputField.type = "text";
-          inputField.value = null;
+          inputField.size = "50";
+          inputField.value = accounts[0];
+          walletInput.parentNode.replaceChild(inputField, walletInput);
         // If we have more than one account, create a select list
         } else {
 
@@ -105,6 +105,7 @@
         inputField.id = 'wallet';
         inputField.name = 'wallet';
         inputField.type = "text";
+        inputField.size = "50";
         inputField.value = null;
 
         // Replace the select field with the input field
