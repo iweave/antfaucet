@@ -1,0 +1,6 @@
+-- SQLite
+UPDATE faucet
+SET eth = 0.0, ant = 0.0
+WHERE
+timestamp in ( 1738743025, 1738743060,
+1739146899, 1739146949);

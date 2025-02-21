@@ -19,7 +19,7 @@ The form uses a free [hcaptcha](https://hCaptcha.com/) [referral link](https://h
 The faucet also needs the private key of a funded wallet (both token and ETH).
 
 
-These need to be passed as environment variables, do not commit them to github.
+These need to be passed as environment variables or in a .env file, do not commit them to github.
 
 | ENV Variable     | Description                                            |
 |------------------|--------------------------------------------------------|

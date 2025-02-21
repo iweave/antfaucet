@@ -1,5 +1,5 @@
 import logging
-from flask import Flask,render_template,request
+from flask import Flask,render_template,request,send_from_directory
 from dotenv import load_dotenv
 import time, datetime
 import os
@@ -82,10 +82,12 @@ def prepare_faucet_database():
                         wallet TEXT,
                         eth REAL,
                         ant REAL,
+                        eth_tx TEXT,
+                        ant_tx TEXT,
                         PRIMARY KEY (timestamp, wallet));""")
             # Insert a record
             cur.execute('''INSERT INTO faucet VALUES( 
-                        0,'0xdead',0,0)''') 
+                        0,'0xdead',0,0,'0xinit','0xinit')''') 
             # Save the changes
             faucetdb.commit()
             return True
@@ -96,8 +98,18 @@ def prepare_faucet_database():
 
 # Drip coins to wallet
 def drip_coins(wallet):
+<<<<<<< HEAD
     #return {'status': True, 'eth_tx': '0x622e2f0d1604d46e5cb553dd799f4034527f68bbd3fc3d561cc44039240d0d34', 'ant_tx': '0x6ee8553310fc684ee648ffcd569c96485e6c5a5b1276cbf3b83677eb7f5e1dfb'}
     
+=======
+    #return {'status': True, 'eth_tx': '0xtest_harness', 'ant_tx': '0xtest_harness'}
+
+    web3 = Web3(HTTPProvider(v2_url))
+
+    account: LocalAccount = Account.from_key(private_key)
+    web3.middleware_onion.add(construct_sign_and_send_raw_middleware(account))
+
+>>>>>>> dev
     if not web3.is_checksum_address(wallet):
         return { "status": False, "reason": "value provided is not a valid wallet" }
     # We successfully connected to the Token chain
@@ -182,14 +194,17 @@ def check_db_for_rate():
     return False
 
 # Save wallet in db
-def add_db(wallet):
+def add_db(wallet,ant_tx,eth_tx):
     # Get a cursor
     cur = faucetdb.cursor()
 
     at = int(time.time())
+    ant_drip = ANT_DRIP if ant_tx != '0xtest_harness' else 0.0
+    eth_drip = ETH_DRIP if eth_tx != '0xtest_harness' else 0.0
+
     app.logger.info("Inserting: "+str(at)+" "+wallet)
-    cur.execute("INSERT INTO faucet VALUES ( ?, ?, ?, ?);",
-                [ at, wallet, ETH_DRIP, ANT_DRIP ])
+    cur.execute("INSERT INTO faucet VALUES ( ?, ?, ?, ?, ?, ? );",
+                [ at, wallet, eth_drip, ant_drip, eth_tx, ant_tx ])
     faucetdb.commit()
 
 # Validate a h-captcha-response
@@ -252,11 +267,11 @@ def validate_request(form_data):
            isinstance(results, dict) and \
            "status" in results:
             # If we got a failure, just return the results
-            if results["status"] == "fail":
+            if results["status"] != True:
                 return results
             
             # Let's store our success
-            add_db(wallet)
+            add_db(wallet,results['ant_tx'],results['eth_tx'])
             results["Wallet"]=wallet
             #return { "status": "fail", "reason": "Always fail" }
             return results
@@ -303,7 +318,12 @@ def data():
             return render_template('fail.html', results=my_data["reason"])
 
         return render_template('success.html', my_data = my_data)
- 
+
+# Load Browser Favorite Icon if accessed directly
+@app.route('/favicon.ico')
+def favicon():
+    return app.send_static_file('favicon.ico')
+    
 if __name__ == '__main__':
     # Initialize database
     if prepare_faucet_database():
