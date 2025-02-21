@@ -122,30 +122,42 @@ def drip_coins(wallet):
         # Convert a human-readable number to fixed decimal with 18 decimal places
         
         ant_amount = token_details.convert_to_raw(ANT_DRIP)
-        ant_tx_hash = erc_20.functions.transfer(wallet, ant_amount).transact({"from": account.address})
+        try:
+            ant_tx_hash = erc_20.functions.transfer(wallet, ant_amount).transact({"from": account.address})
 
-        # Wait for the transactions to complete
-        complete = wait_transactions_to_complete(web3, [ant_tx_hash], max_timeout=datetime.timedelta(minutes=5))
+            # Wait for the transactions to complete
+            complete = wait_transactions_to_complete(web3, [ant_tx_hash], max_timeout=datetime.timedelta(minutes=5))
 
-        # Check our results
-        for receipt in complete.values():
-            if receipt.status != 1:
-                return { "status": False, "reason": "ANT trasnaction did not confirm" }
-            
+            # Check our results
+            for receipt in complete.values():
+                if receipt.status != 1:
+                    return { "status": False, "reason": "ANT trasnaction did not confirm" }
+
+
+        except Exception as error:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            message = template.format(type(error).__name__, error.args)
+            return { "status": False, "reason": message }
+
         #accountNonce = '0x' + str(web3.eth.get_transaction_count(account.address) + 1)
 
         #return { "status": False, "reason": accountNonce }
 
-        eth_amount = token_details.convert_to_raw(ETH_DRIP)
-        eth_tx_hash = web3.eth.send_transaction({
-        #                "nonce": accountNonce,
-                        "to": wallet,
-                        "from": account.address,
-                        "value": eth_amount,
-                    })
+        try:
+            eth_amount = token_details.convert_to_raw(ETH_DRIP)
+            eth_tx_hash = web3.eth.send_transaction({
+            #                "nonce": accountNonce,
+                            "to": wallet,
+                            "from": account.address,
+                            "value": eth_amount,
+                        })
+        except Exception as error:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            message = template.format(type(error).__name__, error.args)
+            return { "status": False, "reason": message }
 
         # Wait for the transactions to complete
-        complete = wait_transactions_to_complete(web3, [eth_tx_hash], max_timeout=datetime.timedelta(minutes=5))
+        complete = wait_transactions_to_complete(web3, [ant_tx_hash, eth_tx_hash], max_timeout=datetime.timedelta(minutes=5))
 
         # Check our results
         for receipt in complete.values():
