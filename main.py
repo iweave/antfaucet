@@ -260,6 +260,13 @@ def validate_request(form_data):
     else:
         return { "status": "fail", "reason": "No captcha provided"}
     
+    if "mm_wallet" in form_data and \
+        len(form_data["mm_wallet"]) > 0 and \
+        len(form_data["mm_wallet"]) <= 42:
+        # Sanitize input data
+        wallet = re.sub(r"[^A-Fa-fXx0-9]+", '', form_data["mm_wallet"])
+        form_data["wallet"] = web3.to_checksum_address(wallet)
+    
     if "wallet" in form_data and \
         len(form_data["wallet"]) > 0 and \
         len(form_data["wallet"]) <= 42:
