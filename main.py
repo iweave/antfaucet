@@ -265,6 +265,7 @@ def validate_request(form_data):
         len(form_data["mm_wallet"]) <= 42:
         # Sanitize input data
         wallet = re.sub(r"[^A-Fa-fXx0-9]+", '', form_data["mm_wallet"])
+        form_data = {}
         form_data["wallet"] = web3.to_checksum_address(wallet)
     
     if "wallet" in form_data and \
