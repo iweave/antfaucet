@@ -7,12 +7,12 @@
   <body>
     <form action="/data/" method = "POST">
         <p>ANT/ETH Faucet</p>
-        <p> Arbitrum Sepolia Wallet <input id="wallet" type = "text" name = "wallet" /></p>
+        <p> Arbitrum One Wallet <input id="wallet" type = "text" name = "wallet" size="50"/></p>
+        <p>The wallet address should be in mixed case and not all lowercase.</p>
         <div class="h-captcha" data-sitekey="{{sitekey}}"></div>
         <p><input type = "submit" value = "Submit" /></p>
     </form>
     
-    <button id='connectWallet' onclick="">Connect Wallet</button>
 
 
     <p>Autonomi <a href="https://www.autonomi.com">Website</a></p>
@@ -20,7 +20,7 @@
     <p>Feedback/Pull Requests <a href="https://github.com/iweave/antfaucet">@github</a></p>
 
     <p></p>
-    <p>Spare ANT/ETH/EMAID can be donated to <div id="donate">0x4913fD25a9C9FB97DA5F83623EBDf7cB32d14f97</div> <button onclick="copyDonate()"><!-- copy icon by Free Icons (https://free-icons.github.io/free-icons/) -->
+    <p>Spare ANT/ETH/EMAID can be donated to <div id="donate">0x270A246bcdD03A4A70dc81C330586882a6ceDF8f</div> <button onclick="copyDonate()"><!-- copy icon by Free Icons (https://free-icons.github.io/free-icons/) -->
       <svg xmlns="http://www.w3.org/2000/svg" height="1em" fill="currentColor" viewBox="0 0 512 512">
         <path
           d="M 416 336 L 224 336 L 416 336 L 224 336 Q 209 335 208 320 L 208 64 L 208 64 Q 209 49 224 48 L 364 48 L 364 48 L 432 116 L 432 116 L 432 320 L 432 320 Q 431 335 416 336 L 416 336 Z M 224 384 L 416 384 L 224 384 L 416 384 Q 443 383 461 365 Q 479 347 480 320 L 480 116 L 480 116 Q 480 96 466 82 L 398 14 L 398 14 Q 384 0 364 0 L 224 0 L 224 0 Q 197 1 179 19 Q 161 37 160 64 L 160 320 L 160 320 Q 161 347 179 365 Q 197 383 224 384 L 224 384 Z M 96 128 Q 69 129 51 147 L 51 147 L 51 147 Q 33 165 32 192 L 32 448 L 32 448 Q 33 475 51 493 Q 69 511 96 512 L 288 512 L 288 512 Q 315 511 333 493 Q 351 475 352 448 L 352 416 L 352 416 L 304 416 L 304 416 L 304 448 L 304 448 Q 303 463 288 464 L 96 464 L 96 464 Q 81 463 80 448 L 80 192 L 80 192 Q 81 177 96 176 L 128 176 L 128 176 L 128 128 L 128 128 L 96 128 L 96 128 Z"
@@ -28,105 +28,5 @@
       </svg></button></p>
 
 
-    <script type="text/javascript">
-      window.userWalletAddress = null
-      const connectWallet = document.getElementById('connectWallet')
-      var walletInput = document.getElementById('wallet')
-
-      function copyDonate() {
-          var range = document.createRange();
-          range.selectNode(document.getElementById("donate"));
-          window.getSelection().removeAllRanges(); // clear current selection
-          window.getSelection().addRange(range); // to select text
-          document.execCommand("copy");
-          window.getSelection().removeAllRanges();// to deselect
-      }
-
-      function checkInstalled() {
-        if (typeof window.ethereum == 'undefined') {
-          connectWallet.innerText = 'MetaMask isnt installed, please install it'
-          connectWallet.classList.remove()
-          connectWallet.classList.add()
-          return false
-        }
-        connectWallet.addEventListener('click', connectWalletwithMetaMask)
-      }
-
-      async function connectWalletwithMetaMask() {
-        walletInput = document.getElementById('wallet')
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-        .catch((e) => {
-        console.error(e.message)
-        return
-        })
-
-        if (!accounts) { return }
-
-        // If we only have one account, update the wallet field
-        if (accounts.length == 1) {
-          window.userWalletAddress = accounts[0]
-          walletInput.value = window.userWalletAddress
-        // If we have more than one account, create a select list
-        } else {
-
-          // Create a select element
-          const selectField = document.createElement('select');
-          selectField.id = 'wallet';
-          selectField.name = walletInput.name;
-
-
-          // Add options to the select field
-          accounts.forEach(account => {
-            const optionElement = document.createElement('option');
-            optionElement.value = account;
-            optionElement.text = account;
-            selectField.appendChild(optionElement);
-          });
-
-          // Replace the input field with the select field
-          walletInput.parentNode.replaceChild(selectField, walletInput);
-        }
-
-        connectWallet.innerText = 'Sign Out'
-        connectWallet.removeEventListener('click', connectWalletwithMetaMask)
-        setTimeout(() => {
-          connectWallet.addEventListener('click', signOutOfMetaMask)
-        }, 200)
-
-      }
-
-
-      function signOutOfMetaMask() {
-        window.userWalletAddress = null
-        connectWallet.innerText = 'Connect Wallet'
-        walletInput = document.getElementById('wallet')
-
-        // Did we change the Input field to a Select field?
-        if ( walletInput instanceof HTMLSelectElement ) {
-          // Create a input element
-          const inputField = document.createElement('input');
-          inputField.id = 'wallet';
-          inputField.name = walletInput.name;
-          inputField.type = "text";
-          inputField.value = null;
-
-          // Replace the select field with the input field
-          walletInput.parentNode.replaceChild(inputField, walletInput);
-        } else {
-          walletInput.value = null
-        }
-
-        connectWallet.removeEventListener('click', signOutOfMetaMask)
-        setTimeout(() => {
-          connectWallet.addEventListener('click', connectWalletwithMetaMask)
-        }, 200  )
-      }
-
-      window.addEventListener('DOMContentLoaded', () => {
-        checkInstalled()
-      })
-
-
-    </script>
   </body>
 </html>

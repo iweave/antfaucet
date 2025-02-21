@@ -21,15 +21,15 @@ logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
 
-TOKEN_CHAIN_ID=421614
-ERC_20_TOKEN_ADDRESS = "0xBE1802c27C324a28aeBcd7eeC7D734246C807194"
+TOKEN_CHAIN_ID=42161
+ERC_20_TOKEN_ADDRESS = "0xa78d8321B20c4Ef90eCd72f2588AA985A4BDb684"
 DEBUG_DRIP = 0.00000001
-ETH_DRIP = .001
-ANT_DRIP = .25
+ETH_DRIP = 0.00005
+ANT_DRIP = 0.0000002
 
 # What date to start checking for faucet drips
 # Allows to report total ant/eth awarded without penalizing early tests
-TIME_HORIZON = 1738085919
+TIME_HORIZON = 1740111373
 
 # Rate informaion in seconds
 RATE_WINDOW = 60 * 60
@@ -49,7 +49,7 @@ assert HCAPTCHA_SITEKEY is not None, "You must set HCAPTCHA_SITEKEY environment 
 ALCHEMY_KEY = os.environ.get('API_KEY')
 assert ALCHEMY_KEY is not None, "You must set API_KEY environment variable"
 
-v2_url = "https://arb-sepolia.g.alchemy.com/v2/" + ALCHEMY_KEY
+v2_url = "https://arb-mainnet.g.alchemy.com/v2/" + ALCHEMY_KEY
 web3 = Web3(HTTPProvider(v2_url))
 #print(f"Connected to blockchain, chain id is {web3.eth.chain_id}. the latest block is {web3.eth.block_number:,}")
 
@@ -128,23 +128,49 @@ def drip_coins(wallet):
             return { "status": False, "reason": "Out of ANT"}
         #return { "status": True, "ant": ant_balance, "eth": eth_balance }
         # Convert a human-readable number to fixed decimal with 18 decimal places
-        eth_amount = token_details.convert_to_raw(ETH_DRIP)
-        eth_tx_hash = web3.eth.send_transaction({
-                        "to": wallet,
-                        "from": account.address,
-                        "value": eth_amount,
-                    })
         
         ant_amount = token_details.convert_to_raw(ANT_DRIP)
-        ant_tx_hash = erc_20.functions.transfer(wallet, ant_amount).transact({"from": account.address})
-        
+        try:
+            ant_tx_hash = erc_20.functions.transfer(wallet, ant_amount).transact({"from": account.address})
+
+            # Wait for the transactions to complete
+            complete = wait_transactions_to_complete(web3, [ant_tx_hash], max_timeout=datetime.timedelta(minutes=5))
+
+            # Check our results
+            for receipt in complete.values():
+                if receipt.status != 1:
+                    return { "status": False, "reason": "ANT trasnaction did not confirm" }
+
+
+        except Exception as error:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            message = template.format(type(error).__name__, error.args)
+            return { "status": False, "reason": message }
+
+        #accountNonce = '0x' + str(web3.eth.get_transaction_count(account.address) + 1)
+
+        #return { "status": False, "reason": accountNonce }
+
+        try:
+            eth_amount = token_details.convert_to_raw(ETH_DRIP)
+            eth_tx_hash = web3.eth.send_transaction({
+            #                "nonce": accountNonce,
+                            "to": wallet,
+                            "from": account.address,
+                            "value": eth_amount,
+                        })
+        except Exception as error:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            message = template.format(type(error).__name__, error.args)
+            return { "status": False, "reason": message }
+
         # Wait for the transactions to complete
-        complete = wait_transactions_to_complete(web3, [eth_tx_hash, ant_tx_hash], max_timeout=datetime.timedelta(minutes=5))
+        complete = wait_transactions_to_complete(web3, [ant_tx_hash, eth_tx_hash], max_timeout=datetime.timedelta(minutes=5))
 
         # Check our results
         for receipt in complete.values():
             if receipt.status != 1:
-                return { "status": False, "reason": "transactions did not confirm" }
+                return { "status": False, "reason": "ETH transaction did not confirm" }
          
         return { "status": True, "eth_tx": eth_tx_hash.hex(), "ant_tx": ant_tx_hash.hex() }
     else:
