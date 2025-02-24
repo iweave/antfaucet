@@ -451,10 +451,12 @@ def data():
     if request.method == 'POST':
         # Get the form data
         form_data = request.form
-
+        if "author" not in form_data or \
+           len(form_data["author"]) == 0:
+            return render_template("data.html", form_data={"reason":"No forum member name provided"})
         my_data = {}
         my_data["challenge"] = generate_author_hash(form_data["author"])
-        return render_template("data.html",form_data=my_data)
+        return render_template("challenge.html",form_data=my_data,forum_topic=FORUM_THREAD)
             
 @app.route('/confirm/', methods = ['POST', 'GET'])
 def confirm():
