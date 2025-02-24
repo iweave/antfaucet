@@ -30,7 +30,7 @@ ANT_DRIP = 0.0000002
 
 # What date to start checking for faucet drips
 # Allows to report total ant/eth awarded without penalizing early tests
-TIME_HORIZON = 1740111373
+TIME_HORIZON = 1740387869
 
 # Rate informaion in seconds
 RATE_WINDOW = 60 * 60
