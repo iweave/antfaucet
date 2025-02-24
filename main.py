@@ -92,10 +92,14 @@ def prepare_faucet_database():
                         ant REAL,
                         eth_tx TEXT,
                         ant_tx TEXT,
+                        author TEXT,
+                        badges TEXT,
                         PRIMARY KEY (timestamp, wallet));""")
+                        
+            cur.execute("CREATE INDEX IF NOT EXISTS author ON faucet(author);")
             # Insert a record
             cur.execute('''INSERT INTO faucet VALUES( 
-                        0,'0xdead',0,0,'0xinit','0xinit')''') 
+                        0,'0xdead',0,0,'0xinit','0xinit','-1',0)''') 
             # Save the changes
             faucetdb.commit()
             return True
@@ -231,7 +235,7 @@ def check_db_for_rate():
     return False
 
 # Save wallet in db
-def add_db(wallet,ant_tx,eth_tx):
+def add_db(wallet,author,ant_tx,eth_tx):
     # Get a cursor
     cur = faucetdb.cursor()
 
@@ -240,8 +244,8 @@ def add_db(wallet,ant_tx,eth_tx):
     eth_drip = ETH_DRIP if eth_tx != '0xtest_harness' else 0.0
 
     app.logger.info("Inserting: "+str(at)+" "+wallet)
-    cur.execute("INSERT INTO faucet VALUES ( ?, ?, ?, ?, ?, ? );",
-                [ at, wallet, eth_drip, ant_drip, eth_tx, ant_tx ])
+    cur.execute("INSERT INTO faucet VALUES ( ?, ?, ?, ?, ?, ?, ?, ?);",
+                [ at, wallet, eth_drip, ant_drip, eth_tx, ant_tx, author, "1" ])
     faucetdb.commit()
 
 # Validate a h-captcha-response
@@ -405,7 +409,7 @@ def validate_request(form_data):
                 return results
             
             # Let's store our success
-            add_db(wallet,results['ant_tx'],results['eth_tx'])
+            add_db(wallet,author,results['ant_tx'],results['eth_tx'])
             results["Wallet"]=wallet
             #return { "status": "fail", "reason": "Always fail" }
             return results
