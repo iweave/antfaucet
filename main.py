@@ -53,7 +53,7 @@ assert ALCHEMY_KEY is not None, "You must set API_KEY environment variable"
 HASH_KEY = os.environ.get('HASH_KEY')
 assert HASH_KEY is not None, "You must set HASH_KEY environment variable"
 
-FORUM_THREAD = 'https://forum.autonomi.community/t/community-faucet-testing/41299/'
+FORUM_THREAD = 'https://forum.autonomi.community/t/community-faucet-live/41299/'
 FORUM_AUTHOR_DATA = 'https://forum.autonomi.community/u/{author}/summary.json'
 FORUM_POST_AUTHOR = "<span itemprop='name'>{author}</span></a>"
 
@@ -304,11 +304,11 @@ def check_forum_auth(form_data):
     else:
         return { "status": "fail", "reason": "No valid member found" }
     
-    #return { "status": "fail", "reason": "".join([FORUM_THREAD,'[0-9]+','\?u=',author])}
+    #return { "status": "fail", "reason": "".join([FORUM_THREAD,'[0-9]+',r'\?u=',author])}
     # Sanitize Forum Post URL
     pattern = re.compile("".join([FORUM_THREAD,r'[0-9]+\?u=',author,'$']))
     if not pattern.match(form_data["post"]):
-        return { "status": "fail", "reason": "Invalid forum thread" }
+        return { "status": "fail", "reason": "Invalid forum link" }
     
     try:
         # Check forum for post for auth
@@ -330,6 +330,7 @@ def check_forum_auth(form_data):
         return { "status": "fail", "reason": "Invalid confirmation code"}
     
     #return { "status": "fail", "reason": results }
+    #return { "status": "fail", "reason": "save for "+author}
 
     return { "status": True, "author": author }
 
