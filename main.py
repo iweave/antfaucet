@@ -53,7 +53,7 @@ assert ALCHEMY_KEY is not None, "You must set API_KEY environment variable"
 HASH_KEY = os.environ.get('HASH_KEY')
 assert HASH_KEY is not None, "You must set HASH_KEY environment variable"
 
-FORUM_THREAD = 'https://forum.autonomi.community/t/community-faucet-testing/41268/'
+FORUM_THREAD = 'https://forum.autonomi.community/t/community-faucet-testing/41299/'
 FORUM_AUTHOR_DATA = 'https://forum.autonomi.community/u/{author}/summary.json'
 FORUM_POST_AUTHOR = "<span itemprop='name'>{author}</span></a>"
 
