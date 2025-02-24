@@ -10,7 +10,10 @@
         <p> Arbitrum One Wallet <input id="wallet" type = "text" name = "wallet" size="50"/></p>
         <p>The wallet address should be in mixed case and not all lowercase.</p>
         <div class="h-captcha" data-sitekey="{{sitekey}}"></div>
-        <p><input type = "submit" value = "Submit" /></p>
+        <p>Autonomi Forum Member Name <input id="author" type="text" name="author" size="32"/></p>
+        <p><input type = "submit" value = "Generate Authorization Code" /></p>
+        <p>Forum Post Link <input id="post" type="text" name="post" size="80"/></p>
+        <p><input type = "submit" value = "Confirm Forum Post" formaction="/confirm/"/></p>
     </form>
     
     <button id='connectWallet' onclick="">Connect Wallet</button>
