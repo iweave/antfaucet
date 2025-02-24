@@ -274,7 +274,10 @@ def check_hcaptcha(captcha):
 # Check that we have a forum user and valid post
 def check_forum_auth(form_data):
     # sanitize author
-    author = re.sub(r"[^A-Za-z0-9]+", '', form_data["author"])[0:64]
+    author = re.sub(r"[^A-Za-z0-9._-]+", '', form_data["author"])[0:64]
+
+    if form_data["author"] != author:
+        return { "status": "fail", "reason": "Invalid member name" }
 
     # check db for author
     if check_db_for_author(author):
@@ -295,9 +298,9 @@ def check_forum_auth(form_data):
     if isinstance(results,dict) and \
         "user_summary" in results and \
         isinstance(results["user_summary"],dict) and \
-        "days_visited" in results["user_summary"] and \
-        int(results["user_summary"]["days_visited"]) > 1:
-        pass
+        "days_visited" in results["user_summary"]:
+        if int(results["user_summary"]["days_visited"]) < 2:
+            return { "status": "fail", "reason": "Member too new" }
     else:
         return { "status": "fail", "reason": "No valid member found" }
     
