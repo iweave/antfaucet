@@ -355,11 +355,13 @@ def validate_request(form_data):
     if "post" not in form_data or \
         len(form_data["post"]) == 0 or \
         len(form_data["post"]) > 128 or \
-        FORUM_THREAD not in form_data["post"] or \
-        "author" not in form_data or \
+        FORUM_THREAD not in form_data["post"]:
+        return { "status": "fail", "reason": "Invalid forum post link" }
+    
+    if "author" not in form_data or \
         len(form_data["author"]) == 0 or \
         len(form_data["author"]) > 64:
-        return { "status": "fail", "reason": "Missing Data from form" }
+        return { "status": "fail", "reason": "Member name out of bounds" }
     
     # Let's do some checking
     results = check_forum_auth(form_data)
