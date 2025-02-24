@@ -16,6 +16,7 @@ from eth_defi.confirmation import wait_transactions_to_complete
 from urllib.parse import urlencode
 import requests, json, re
 import sqlite3
+import hashlib
 
 logging.basicConfig(level=logging.INFO)
 
@@ -48,6 +49,13 @@ assert HCAPTCHA_SITEKEY is not None, "You must set HCAPTCHA_SITEKEY environment 
 
 ALCHEMY_KEY = os.environ.get('API_KEY')
 assert ALCHEMY_KEY is not None, "You must set API_KEY environment variable"
+
+HASH_KEY = os.environ.get('HASH_KEY')
+assert HASH_KEY is not None, "You must set HASH_KEY environment variable"
+
+FORUM_THREAD = 'https://forum.autonomi.community/t/community-faucet-testing/41268/'
+FORUM_AUTHOR_DATA = 'https://forum.autonomi.community/u/{author}/summary.json'
+FORUM_POST_AUTHOR = "<span itemprop='name'>{author}</span></a>"
 
 v2_url = "https://arb-mainnet.g.alchemy.com/v2/" + ALCHEMY_KEY
 web3 = Web3(HTTPProvider(v2_url))
@@ -179,6 +187,18 @@ def check_db_for_wallet(wallet):
     if cached_result:
         return True
 
+# See if author has already received payments
+def check_db_for_author(author):
+    #return True
+    # Get a cursor
+    cur = faucetdb.cursor()
+    
+    # See if we get a cached record
+    cur.execute("SELECT timestamp FROM faucet WHERE author = ? AND timestamp > ? LIMIT 1", [ author, str(TIME_HORIZON) ])
+    cached_result = cur.fetchall()
+    if cached_result:
+        return True
+    
 # Check for volume of drips
 def check_db_for_drips():
     #return False
@@ -247,6 +267,70 @@ def check_hcaptcha(captcha):
     else:
         return False
 
+# Check that we have a forum user and valid post
+def check_forum_auth(form_data):
+    # sanitize author
+    author = re.sub(r"[^A-Za-z0-9]+", '', form_data["author"])[0:64]
+
+    # check db for author
+    if check_db_for_author(author):
+        return { "status": "fail", "reason": "already received payout" }
+    
+    try:
+        # Check forum for active user
+        #return { "status": False, "reason": FORUM_AUTHOR_DATA.format(author=author) }
+        response = requests.get(FORUM_AUTHOR_DATA.format(author=author))
+
+        # Parse the json response
+        #return { "status": False, "reason": response.text }
+        results = json.loads(response.text)
+    except:
+        return { "status": "fail", "reason": "Failed forum author request" }
+    
+    #return { "status": False, "reason": results['user_summary']['days_visited'] }
+    if isinstance(results,dict) and \
+        "user_summary" in results and \
+        isinstance(results["user_summary"],dict) and \
+        "days_visited" in results["user_summary"] and \
+        int(results["user_summary"]["days_visited"]) > 1:
+        pass
+    else:
+        return { "status": "fail", "reason": "No valid member found" }
+    
+    #return { "status": "fail", "reason": "".join([FORUM_THREAD,'[0-9]+','\?u=',author])}
+    # Sanitize Forum Post URL
+    pattern = re.compile("".join([FORUM_THREAD,r'[0-9]+\?u=',author,'$']))
+    if not pattern.match(form_data["post"]):
+        return { "status": "fail", "reason": "Invalid forum thread" }
+    
+    try:
+        # Check forum for post for auth
+        response = requests.get(form_data["post"])
+
+        # Parse the response
+        #return { "status": False, "reason": response.text }
+        results = response.text
+    except:
+        return { "status": "fail", "reason": "Failed forum post request" }
+
+    #return { "status": "fail", "reason": FORUM_POST_AUTHOR.format(author=author) in results }
+    # Check for author of the post
+    if not FORUM_POST_AUTHOR.format(author=author) in results:
+        return { "status": "fail", "reason": "Invalid author" }
+    
+    # Check post for authors key
+    if not generate_author_hash(author) in results:
+        return { "status": "fail", "reason": "Invalid confirmation code"}
+    
+    #return { "status": "fail", "reason": results }
+
+    return { "status": True, "author": author }
+
+# Generate Hash
+def generate_author_hash(author):
+        challenge = str(HASH_KEY)+author
+        return hashlib.md5(challenge.encode()).hexdigest()
+
 # Validate our form
 def validate_request(form_data):
 
@@ -259,6 +343,31 @@ def validate_request(form_data):
         #    return [{ "captcha": captcha }]
     else:
         return { "status": "fail", "reason": "No captcha provided"}
+    
+    # Did we get a forum post
+    if "post" not in form_data or \
+        len(form_data["post"]) == 0 or \
+        len(form_data["post"]) > 128 or \
+        FORUM_THREAD not in form_data["post"] or \
+        "author" not in form_data or \
+        len(form_data["author"]) == 0 or \
+        len(form_data["author"]) > 64:
+        return { "status": "fail", "reason": "Missing Data from form" }
+    
+    # Let's do some checking
+    results = check_forum_auth(form_data)
+    if results and \
+        isinstance(results, dict) and \
+        "status" in results:
+        # If we got a failure, just return the results
+        if results["status"] != True:
+            return results
+        if "author" in results:
+            author = results["author"]
+        else:
+            return { "status": "fail", "reason": "Invalid authorization" }
+    else:
+        return { "status": "fail", "reason": "No results from forum confirmation"}
     
     if "mm_wallet" in form_data and \
         len(form_data["mm_wallet"]) > 0 and \
@@ -336,6 +445,20 @@ def data():
         # Get the form data
         form_data = request.form
 
+        my_data = {}
+        my_data["challenge"] = generate_author_hash(form_data["author"])
+        return render_template("data.html",form_data=my_data)
+            
+@app.route('/confirm/', methods = ['POST', 'GET'])
+def confirm():
+    if request.method == 'GET':
+        return f"The URL /data is accessed directly. Try going to '/form' to submit form"
+    if request.method == 'POST':
+        # Get the form data
+        form_data = request.form
+
+        
+        #return render_template("data.html",form_data=form_data)
         # Verify the request looks ok
         my_data = validate_request(form_data)
 
