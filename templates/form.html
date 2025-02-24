@@ -5,9 +5,9 @@
       <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
   </head>
   <body>
+    <h2>ANT/ETH Faucet</h2>
     <button id='connectWallet' onclick="">Connect Wallet</button>
     <form action="/data/" method = "POST">
-        <p>ANT/ETH Faucet</p>
         <p> Arbitrum One Wallet <input id="wallet" type = "text" name = "wallet" size="50"/></p>
         <p>The wallet address should be in mixed case and not all lowercase.</p>
         <div class="h-captcha" data-sitekey="{{sitekey}}"></div>
