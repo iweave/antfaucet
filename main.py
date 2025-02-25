@@ -431,11 +431,11 @@ app.config['MAX_CONTENT_LENGTH'] = 1 * 1000 * 1000
 
 @app.route('/')
 def home():
-    return render_template('form.html',sitekey=HCAPTCHA_SITEKEY)
+    return render_template('form.html',sitekey=HCAPTCHA_SITEKEY,forum_link=FORUM_THREAD)
 
 @app.route('/form')
 def form():
-    return render_template('form.html',sitekey=HCAPTCHA_SITEKEY)
+    return home()
 
 @app.route('/drips')
 def drips():
