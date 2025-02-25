@@ -304,9 +304,11 @@ def check_forum_auth(form_data):
     else:
         return { "status": "fail", "reason": "No valid member found" }
     
+    
+    #return { "status": "fail", "reason": "".join([FORUM_THREAD,'[0-9]{1,16}'])}
     #return { "status": "fail", "reason": "".join([FORUM_THREAD,'[0-9]+',r'\?u=',author])}
     # Sanitize Forum Post URL
-    pattern = re.compile("".join([FORUM_THREAD,r'[0-9]+\?u=',author,'$']))
+    pattern = re.compile("".join([FORUM_THREAD,r'[0-9]{1,16}']))
     if not pattern.match(form_data["post"]):
         return { "status": "fail", "reason": "Invalid forum link" }
     
