@@ -281,7 +281,7 @@ def check_forum_auth(form_data):
 
     # check db for author
     if check_db_for_author(author):
-        return { "status": "fail", "reason": "already received payout" }
+        return { "status": "fail", "reason": "member already received payout maximum" }
     
     try:
         # Check forum for active user
@@ -328,7 +328,8 @@ def check_forum_auth(form_data):
         return { "status": "fail", "reason": "Invalid author" }
     
     # Check post for authors key
-    if not generate_author_hash(author) in results:
+    
+    if not generate_author_hash(author,get_wallet_from_formdata(form_data)) in results:
         return { "status": "fail", "reason": "Invalid confirmation code"}
     
     #return { "status": "fail", "reason": results }
@@ -337,9 +338,26 @@ def check_forum_auth(form_data):
     return { "status": True, "author": author }
 
 # Generate Hash
-def generate_author_hash(author):
-        challenge = str(HASH_KEY)+author
+def generate_author_hash(author,wallet):
+        
+        challenge = str(HASH_KEY)+author+str(wallet)
         return hashlib.md5(challenge.encode()).hexdigest()
+
+# Dig wallet out of form
+def get_wallet_from_formdata(form_data):
+    if "mm_wallet" in form_data and \
+        len(form_data["mm_wallet"]) > 0 and \
+        len(form_data["mm_wallet"]) <= 42:
+        # Sanitize input data
+        wallet = web3.to_checksum_address(re.sub(r"[^A-Fa-fXx0-9]+", '', form_data["mm_wallet"]))
+    elif "wallet" in form_data and \
+        len(form_data["wallet"]) > 0 and \
+        len(form_data["wallet"]) <= 42:
+        # Sanitize input data
+        wallet = re.sub(r"[^A-Fa-fXx0-9]+", '', form_data["wallet"])
+    else:
+        return False
+    return wallet
 
 # Validate our form
 def validate_request(form_data):
@@ -381,23 +399,15 @@ def validate_request(form_data):
     else:
         return { "status": "fail", "reason": "No results from forum confirmation"}
     
-    if "mm_wallet" in form_data and \
-        len(form_data["mm_wallet"]) > 0 and \
-        len(form_data["mm_wallet"]) <= 42:
-        # Sanitize input data
-        wallet = re.sub(r"[^A-Fa-fXx0-9]+", '', form_data["mm_wallet"])
-        form_data = {}
-        form_data["wallet"] = web3.to_checksum_address(wallet)
-    
-    if "wallet" in form_data and \
-        len(form_data["wallet"]) > 0 and \
-        len(form_data["wallet"]) <= 42:
-        # Sanitize input data
-        wallet = re.sub(r"[^A-Fa-fXx0-9]+", '', form_data["wallet"])
+
+    # Get wallet from form input
+    wallet = get_wallet_from_formdata(form_data)
+
+    if wallet:
 
         # See if this wallet has already suceeded
         if check_db_for_wallet(wallet):
-            return { "status": "fail", "reason": "already received payout" }
+            return { "status": "fail", "reason": "wallet already received payout maximum" }
         
         # Check for rate limit
         rate_limit = check_db_for_rate()
@@ -459,8 +469,11 @@ def data():
         if "author" not in form_data or \
            len(form_data["author"]) == 0:
             return render_template("data.html", form_data={"reason":"No forum member name provided"})
+        wallet = get_wallet_from_formdata(form_data)
+        if not wallet:
+            return render_template("data.html",form_data={"reason":"No wallet provided"})
         my_data = {}
-        my_data["challenge"] = generate_author_hash(form_data["author"])
+        my_data["challenge"] = generate_author_hash(form_data["author"],wallet)
         return render_template("challenge.html",form_data=my_data,forum_topic=FORUM_THREAD)
             
 @app.route('/confirm/', methods = ['POST', 'GET'])
