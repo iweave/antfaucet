@@ -30,7 +30,7 @@ ANT_DRIP = 0.0000002
 
 # What date to start checking for faucet drips
 # Allows to report total ant/eth awarded without penalizing early tests
-TIME_HORIZON = 1740387869
+TIME_HORIZON = 1740620154
 
 # Rate informaion in seconds
 RATE_WINDOW = 60 * 60
@@ -243,7 +243,7 @@ def add_db(wallet,author,ant_tx,eth_tx):
     ant_drip = ANT_DRIP if ant_tx != '0xtest_harness' else 0.0
     eth_drip = ETH_DRIP if eth_tx != '0xtest_harness' else 0.0
 
-    app.logger.info("Inserting: "+str(at)+" "+wallet)
+    app.logger.info("Inserting: "+str(at)+" "+author+" "+wallet)
     cur.execute("INSERT INTO faucet VALUES ( ?, ?, ?, ?, ?, ?, ?, ?);",
                 [ at, wallet, eth_drip, ant_drip, eth_tx, ant_tx, author, "1" ])
     faucetdb.commit()
