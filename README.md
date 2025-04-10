@@ -2,7 +2,7 @@
 Faucet for ERC-20/ETH
 
 
-This is a sample Flask app to create a cryptocurrency faucet for a ERC-20 Token and ETH.
+This is a sample Flask app to create a cryptocurrency faucet for a ERC-20 Token and ETH. By default, the ERC-20 Token dispenses Arbitrum [Autonomi](https://autonomi.com) Network Token [$ANT](https://coinmarketcap.com/currencies/autonomi/).
 
 This faucet transfers ETH to enable the wallet to have gas to use with the ERC-20 tokens
 
@@ -32,8 +32,8 @@ The remaining configuration can be turned into environment variables or just cha
 
 ### ERC_TOKEN
 
-ERC_20_TOKEN_ADDRESS is the address of the token we want to transfer.
-TOKEN_CHAIN_ID is the chain ID of the Network (In this case Aribtrum Sepolia) that we are trying to connect to
+ERC_20_TOKEN_ADDRESS is the address of the token we want to transfer. The recent integration with the Autonomi Community Forum complicates reusing this code for another token, focus on the [last](https://github.com/iweave/antfaucet/commit/ee7df5d6694d1be3951dd32606e817509366a9ed) commit before the feature was added.
+TOKEN_CHAIN_ID is the chain ID of the Network (In this case Aribtrum One) that we are trying to connect to
 
 ```
 TOKEN_CHAIN_ID=421614
