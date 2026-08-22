@@ -443,6 +443,7 @@ app.config['MAX_CONTENT_LENGTH'] = 1 * 1000 * 1000
 
 @app.route('/')
 def home():
+    return render_template('offline.html')
     return render_template('form.html',sitekey=HCAPTCHA_SITEKEY,forum_link=FORUM_THREAD)
 
 @app.route('/form')
